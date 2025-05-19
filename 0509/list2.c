@@ -7,12 +7,10 @@
 #include <stdlib.h>
 #include <time.h>
 
-// 함수 선언
 char type(mode_t mode);
 char *perm(mode_t mode);
 void printStat(char *pathname, char *file, struct stat *st);
 
-/* 디렉터리 내용을 자세히 리스트한다. */
 int main(int argc, char **argv)
 {
     DIR *dp;
@@ -21,60 +19,54 @@ int main(int argc, char **argv)
     struct stat st;
     char path[BUFSIZ + 1];
 
-    // 디렉터리 경로 설정 (기본: 현재 디렉터리)
     if (argc == 1)
         dir = ".";
     else
         dir = argv[1];
 
-    // 디렉터리 열기
     if ((dp = opendir(dir)) == NULL) {
         perror(dir);
         exit(1);
     }
 
-    // 디렉터리 내 파일들을 하나씩 처리
     while ((d = readdir(dp)) != NULL) {
-        sprintf(path, "%s/%s", dir, d->d_name); // 전체 경로 생성
+        sprintf(path, "%s/%s", dir, d->d_name); 
 
-        if (lstat(path, &st) < 0) { // 파일 정보 가져오기
+        if (lstat(path, &st) < 0) { 
             perror(path);
             continue;
         }
 
-        printStat(path, d->d_name, &st); // 정보 출력
+        printStat(path, d->d_name, &st); 
         putchar('\n');
     }
 
-    closedir(dp); // 디렉터리 닫기
+    closedir(dp); 
     exit(0);
 }
 
-/* 파일 상태 정보를 출력 */
 void printStat(char *pathname, char *file, struct stat *st) {
-    printf("%5ld ", st->st_blocks);                                 // 블록 수
-    printf("%c%s ", type(st->st_mode), perm(st->st_mode));          // 파일 타입 + 권한
-    printf("%3ld ", (long)st->st_nlink);                             // 링크 수
-    printf("%s %s ", getpwuid(st->st_uid)->pw_name,                 // 사용자 이름
-                   getgrgid(st->st_gid)->gr_name);                  // 그룹 이름
-    printf("%9ld ", (long)st->st_size);                              // 파일 크기
-    printf("%.12s ", ctime(&st->st_mtime) + 4);                      // 수정 시간
-    printf("%s", file);                                              // 파일 이름
+    printf("%5ld ", st->st_blocks);                                
+    printf("%c%s ", type(st->st_mode), perm(st->st_mode));         
+    printf("%3ld ", (long)st->st_nlink);                             
+    printf("%s %s ", getpwuid(st->st_uid)->pw_name,                 
+                   getgrgid(st->st_gid)->gr_name);                 
+    printf("%9ld ", (long)st->st_size);                              
+    printf("%.12s ", ctime(&st->st_mtime) + 4);                     
+    printf("%s", file);                                             
 }
 
-/* 파일 타입을 리턴 */
 char type(mode_t mode) {
-    if (S_ISREG(mode)) return '-';   // 일반 파일
-    if (S_ISDIR(mode)) return 'd';   // 디렉터리
-    if (S_ISCHR(mode)) return 'c';   // 문자 디바이스
-    if (S_ISBLK(mode)) return 'b';   // 블록 디바이스
-    if (S_ISLNK(mode)) return 'l';   // 심볼릭 링크
-    if (S_ISFIFO(mode)) return 'p';  // FIFO (파이프)
-    if (S_ISSOCK(mode)) return 's';  // 소켓
-    return '?';                      // 알 수 없는 타입
+    if (S_ISREG(mode)) return '-';  
+    if (S_ISDIR(mode)) return 'd';   
+    if (S_ISCHR(mode)) return 'c';   
+    if (S_ISBLK(mode)) return 'b';   
+    if (S_ISLNK(mode)) return 'l';   
+    if (S_ISFIFO(mode)) return 'p';  
+    if (S_ISSOCK(mode)) return 's';  
+    return '?';                      
 }
 
-/* 파일 사용 권한을 문자열로 리턴 */
 char* perm(mode_t mode) {
     static char perms[10];
     int i;
